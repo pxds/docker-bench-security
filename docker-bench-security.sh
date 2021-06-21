@@ -112,6 +112,7 @@ fi
 
 totalChecks=0
 currentScore=0
+maxScore=0
 
 logit "Initializing $(date +%Y-%m-%dT%H:%M:%S%:z)\n"
 beginjson "$version" "$(date +%s)"
@@ -206,6 +207,7 @@ main () {
   logit "\n\n${bldylw}Section C - Score${txtrst}\n"
   info "Checks: $totalChecks"
   info "Score: $currentScore\n"
+  info "Max Score: $maxScore\n"
 
   endjson "$totalChecks" "$currentScore" "$(date +%s)"
 }

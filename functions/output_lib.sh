@@ -54,6 +54,7 @@ pass () {
   fi
   if [ "$passScored" = "true" ]; then
     currentScore=$((currentScore + 1))
+    maxScore=$((maxScore + 1))
   fi
   if [ "$passScored" != "true" ] && [ "$passCountCheck" != "true" ]; then
     printf "%b\n" "${bldgrn}[PASS]${txtrst} $1" | tee -a "$logger"
@@ -74,6 +75,7 @@ warn () {
     printf "%b\n" "${bldred}[WARN]${txtrst} $2" | tee -a "$logger"
     totalChecks=$((totalChecks + 1))
     currentScore=$((currentScore - 1))
+    maxScore=$((maxScore + 1))
     return
   fi
   printf "%b\n" "${bldred}[WARN]${txtrst} $1" | tee -a "$logger"
@@ -173,16 +175,30 @@ logcheckresult() {
   printf "\n        }" | tee -a "$logger.json" 2>/dev/null 1>&2
 
   # Save remediation measure for print log to stdout
-  if [ -n "$remediation" ] && [ "$1" != "PASS" ]; then
+  if [ -n "$remediation" ] && [ "$1" != "PASS" ] && [ "$1" != "WARN" ]; then
     if [ -n "${checkHeader}" ]; then
-      if [ -n "${addSpaceHeader}" ]; then
-        globalRemediation="${globalRemediation}\n"
-      fi
-      globalRemediation="${globalRemediation}\n${bldblu}[INFO]${txtrst} ${checkHeader}"
-      checkHeader=""
-      addSpaceHeader="1"
+        if [ -n "${addSpaceHeader}" ]; then
+          globalRemediation="${globalRemediation}\n"
+        fi
+        globalRemediation="${globalRemediation}\n${bldblu}[INFO]${txtrst} ${checkHeader}"
+        checkHeader=""
+        addSpaceHeader="1"
     fi
     globalRemediation="${globalRemediation}\n${bldblu}[INFO]${txtrst} ${id} - ${remediation}"
+    if [ -n "${remediationImpact}" ]; then
+      globalRemediation="${globalRemediation} Remediation Impact: ${remediationImpact}"
+    fi
+  fi
+  if [ -n "$remediation" ] && [ "$1" == "WARN" ]; then
+    if [ -n "${checkHeader}" ]; then
+        if [ -n "${addSpaceHeader}" ]; then
+          globalRemediation="${globalRemediation}\n"
+        fi
+        globalRemediation="${globalRemediation}\n${bldblu}[INFO]${txtrst} ${checkHeader}"
+        checkHeader=""
+        addSpaceHeader="1"
+    fi
+    globalRemediation="${globalRemediation}\n${bldred}[WARN]${txtrst} ${id} - ${remediation}"
     if [ -n "${remediationImpact}" ]; then
       globalRemediation="${globalRemediation} Remediation Impact: ${remediationImpact}"
     fi
